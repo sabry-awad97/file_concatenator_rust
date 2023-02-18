@@ -19,12 +19,12 @@ pub struct RustFileConcatenator<'a> {
 }
 
 impl<'a> RustFileConcatenator<'a> {
-    pub fn new(output_file_path: &'a Path) -> Self {
+    pub fn new(output_file_path: &'a Path, total_num_files: usize) -> Self {
         Self {
             output_file_path,
             output_file: None,
             num_files_processed: 0,
-            total_num_files: 0,
+            total_num_files,
             start_time: None,
         }
     }
@@ -37,7 +37,6 @@ impl<'a> RustFileConcatenator<'a> {
         self.output_file =
             Some(File::create(self.output_file_path).map_err(FileSystemEntryError::IoError)?);
 
-        self.get_total_num_files();
         Ok(())
     }
 
@@ -69,28 +68,7 @@ impl<'a> RustFileConcatenator<'a> {
         )
     }
 
-    fn get_total_num_files(&mut self) {
-        let mut input = String::new();
-        loop {
-            println!("Enter the total number of files:");
-            match std::io::stdin().read_line(&mut input) {
-                Ok(_) => match input.trim().parse() {
-                    Ok(num) => {
-                        self.total_num_files = num;
-                        break;
-                    }
-                    Err(_) => {
-                        println!("Invalid input, please enter a number.");
-                        input.clear();
-                    }
-                },
-                Err(_) => {
-                    println!("Error reading input.");
-                    input.clear();
-                }
-            }
-        }
-    }
+    
 }
 
 impl<'a> FileSystemEntryProcessor for RustFileConcatenator<'a> {

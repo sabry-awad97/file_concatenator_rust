@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 humantime = "2.1.0"
+num_cpus = "1.15.0"

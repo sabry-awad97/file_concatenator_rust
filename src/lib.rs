@@ -7,6 +7,27 @@ mod rust_file_concatenator;
 use filesystem_walker::{FileSystemEntryError, FileSystemEntryResult, FileSystemWalker};
 use rust_file_concatenator::RustFileConcatenator;
 
+fn get_total_num_files() -> usize {
+    let mut input = String::new();
+    loop {
+        println!("Enter the total number of files:");
+        match std::io::stdin().read_line(&mut input) {
+            Ok(_) => {
+                if let Ok(num) = input.trim().parse::<usize>() {
+                    return num;
+                } else {
+                    println!("Invalid input, please enter a number.");
+                    input.clear();
+                }
+            }
+            Err(_) => {
+                println!("Error reading input.");
+                input.clear();
+            }
+        }
+    }
+}
+
 pub fn run() -> FileSystemEntryResult<()> {
     // Get the input directory and output file paths from command-line arguments
     println!("Enter a path:");
@@ -36,8 +57,9 @@ pub fn run() -> FileSystemEntryResult<()> {
         .map_err(|e| FileSystemEntryError::IoError(e.into()))?
         .join("output.rs");
 
+    let total_num_files = get_total_num_files();
     // Create the output file
-    let mut file_concatenator = RustFileConcatenator::new(&output_file_path);
+    let mut file_concatenator = RustFileConcatenator::new(&output_file_path, total_num_files);
     file_concatenator.open_output_file()?;
 
     // Walk the directory tree and concatenate the Rust files
