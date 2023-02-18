@@ -22,6 +22,7 @@ pub enum FileSystemEntryError {
     NotFound,
     NotADirectory,
     AlreadyExists,
+    InvalidInput,
     IoError(io::Error),
 }
 
@@ -35,6 +36,7 @@ impl std::fmt::Display for FileSystemEntryError {
             FileSystemEntryError::NotFound => write!(f, "File or directory not found"),
             FileSystemEntryError::NotADirectory => write!(f, "Path is not a directory"),
             FileSystemEntryError::AlreadyExists => write!(f, "File or directory already exists"),
+            FileSystemEntryError::InvalidInput => write!(f, "Invalid input"),
             FileSystemEntryError::IoError(e) => write!(f, "IO error: {}", e),
         }
     }
