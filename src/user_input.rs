@@ -1,4 +1,7 @@
-use std::{io, path::PathBuf};
+use std::{
+    io::{self, Write},
+    path::PathBuf,
+};
 
 use crate::error::ProgramError;
 
@@ -19,7 +22,7 @@ impl UserInput {
     // Prompt the user to enter the path to the input directory
     pub fn get_input_path() -> Result<PathBuf, ProgramError> {
         // Get the input directory and output file paths from command-line arguments
-        println!("Enter a path:");
+        print!("Enter the path to the input directory: ");
 
         let mut input_path = String::new();
 
@@ -40,7 +43,7 @@ impl UserInput {
         if !input_dir_path.is_dir() {
             return Err(ProgramError::NotADirectory.into());
         }
-        
+
         Ok(input_dir_path)
     }
 
@@ -48,16 +51,19 @@ impl UserInput {
     pub fn get_total_num_files() -> Result<usize, ProgramError> {
         let mut input = String::new();
         loop {
-            println!("Enter the total number of files:");
+            print!("Enter the total number of files to concatenate: ");
+            io::stdout().flush().unwrap();
+
             io::stdin()
                 .read_line(&mut input)
-                .map_err(|e| ProgramError::IoError(e.into()))?;
-            
-            if let Ok(num) = input.trim().parse::<usize>() {
-                return Ok(num);
-            } else {
-                println!("Invalid input, please enter a number.");
-                input.clear();
+                .map_err(|e| ProgramError::IoError(e).into())?;
+
+            match input.trim().parse() {
+                Ok(num) if num > 0 => return Ok(num),
+                _ => {
+                    println!("Invalid input. Please enter a positive integer.");
+                    input.clear();
+                }
             }
         }
     }
