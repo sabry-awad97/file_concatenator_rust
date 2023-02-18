@@ -3,9 +3,12 @@ use std::path::PathBuf;
 
 mod filesystem_walker;
 mod rust_file_concatenator;
+mod error;
+use filesystem_walker::{FileSystemEntryResult, FileSystemWalker};
 
-use filesystem_walker::{FileSystemEntryError, FileSystemEntryResult, FileSystemWalker};
 use rust_file_concatenator::RustFileConcatenator;
+
+use crate::error::ProgramError;
 
 fn get_total_num_files() -> usize {
     let mut input = String::new();
@@ -36,7 +39,7 @@ pub fn run() -> FileSystemEntryResult<()> {
     let mut input_path = String::new();
     io::stdin()
         .read_line(&mut input_path)
-        .map_err(|e| FileSystemEntryError::IoError(e.into()))?;
+        .map_err(|e| ProgramError::IoError(e.into()))?;
 
     // Remove any leading or trailing whitespace from the input path
     let input_path = input_path.trim();
@@ -45,16 +48,16 @@ pub fn run() -> FileSystemEntryResult<()> {
     let input_dir_path = PathBuf::from(input_path);
 
     if !input_dir_path.exists() {
-        return Err(FileSystemEntryError::NotFound);
+        return Err(ProgramError::NotFound);
     }
 
     if !input_dir_path.is_dir() {
-        return Err(FileSystemEntryError::NotADirectory);
+        return Err(ProgramError::NotADirectory);
     }
 
     // Create a PathBuf for the output file
     let output_file_path = std::env::current_dir()
-        .map_err(|e| FileSystemEntryError::IoError(e.into()))?
+        .map_err(|e| ProgramError::IoError(e.into()))?
         .join("output.rs");
 
     let total_num_files = get_total_num_files();

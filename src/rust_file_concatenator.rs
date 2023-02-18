@@ -7,7 +7,7 @@ use std::{
 
 use crate::{
     filesystem_walker::{FileSystemEntry, FileSystemEntryProcessor, FileSystemEntryType},
-    FileSystemEntryError, FileSystemEntryResult,
+    FileSystemEntryResult, ProgramError,
 };
 
 pub struct RustFileConcatenator<'a> {
@@ -31,18 +31,18 @@ impl<'a> RustFileConcatenator<'a> {
 
     pub fn open_output_file(&mut self) -> FileSystemEntryResult<()> {
         if let Some(_) = self.output_file {
-            return Err(FileSystemEntryError::AlreadyExists);
+            return Err(ProgramError::AlreadyExists);
         }
 
         self.output_file =
-            Some(File::create(self.output_file_path).map_err(FileSystemEntryError::IoError)?);
+            Some(File::create(self.output_file_path).map_err(ProgramError::IoError)?);
 
         Ok(())
     }
 
     pub fn close_output_file(&mut self) -> FileSystemEntryResult<()> {
         if let Some(mut output_file) = self.output_file.take() {
-            output_file.flush().map_err(FileSystemEntryError::IoError)?;
+            output_file.flush().map_err(ProgramError::IoError)?;
         }
         Ok(())
     }
@@ -67,8 +67,6 @@ impl<'a> RustFileConcatenator<'a> {
             humantime::format_duration(elapsed_time),
         )
     }
-
-    
 }
 
 impl<'a> FileSystemEntryProcessor for RustFileConcatenator<'a> {
@@ -80,19 +78,19 @@ impl<'a> FileSystemEntryProcessor for RustFileConcatenator<'a> {
                 if let Some(output_file) = &mut self.output_file {
                     if entry.path.extension().map_or(false, |ext| ext == "rs") {
                         let mut input_file =
-                            File::open(&entry.path).map_err(FileSystemEntryError::IoError)?;
+                            File::open(&entry.path).map_err(ProgramError::IoError)?;
                         let mut contents = String::new();
                         input_file
                             .read_to_string(&mut contents)
-                            .map_err(FileSystemEntryError::IoError)?;
+                            .map_err(ProgramError::IoError)?;
 
                         writeln!(output_file, "// Start of file: {}", entry.path.display())
-                            .map_err(FileSystemEntryError::IoError)?;
+                            .map_err(ProgramError::IoError)?;
                         output_file
                             .write_all(contents.as_bytes())
-                            .map_err(FileSystemEntryError::IoError)?;
+                            .map_err(ProgramError::IoError)?;
                         writeln!(output_file, "// End of file: {}", entry.path.display())
-                            .map_err(FileSystemEntryError::IoError)?;
+                            .map_err(ProgramError::IoError)?;
                     }
                 }
             }
